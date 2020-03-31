@@ -16,7 +16,7 @@ public class GuardedCircularBuffer<T> extends CircularBuffer<T> implements Buffe
                 e.printStackTrace();
             }
         }
-        notifyAll();
+        notify();
         return super.put(element);
     }
 
@@ -29,7 +29,7 @@ public class GuardedCircularBuffer<T> extends CircularBuffer<T> implements Buffe
                 e.printStackTrace();
             }
         }
-        notifyAll();
+        notify();
         return super.get();
     }
 }

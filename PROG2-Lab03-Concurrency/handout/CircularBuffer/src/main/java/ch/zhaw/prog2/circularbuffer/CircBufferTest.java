@@ -50,11 +50,15 @@ public class CircBufferTest {
         @Override
         public void run() {
             // ToDo: Continuously produce counting Strings in prodTime interval
-            try {
-                producerFillBuffer.put("ich heisse Selim");
-                sleep((int) (Math.random() * prodTime));
-            } catch (InterruptedException e){
-                e.printStackTrace();
+            while (true) {
+                try {
+                    double random = (Math.random() * prodTime);
+                    sleep((int)random);
+                    producerFillBuffer.put("ich heisse Selim" + " Time to produce -> " + random);
+                    System.out.println("! produced !");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -74,13 +78,34 @@ public class CircBufferTest {
         @Override
         public void run() {
             // ToDo: Continuously consume Strings in prodTime intervall
-            try{
-                consumerReadBuffer.get();
-                sleep((int)(Math.random() * consTime));
-            } catch (InterruptedException e){
-                e.printStackTrace();
+            while (true) {
+                try {
+                    consumerReadBuffer.get();
+                    sleep((int) (Math.random() * consTime));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
-
+    /*
+     * Remarks
+     *
+     * Wenn maxProdTime und maxConsTime identisch sind schwank die Anzahl der Element im Buffer leicht
+     * aber sie bleibt immer ungefähr gleich (je nach random faktor)
+     *
+     * Wenn maxProdTime weniger ist als maxConsTime steigt die Anzahl Element im Buffer bis das max erreicht ist
+     *
+     * Wenn maxProdTime mehr ist als maxConsTime ist die Anzahl der Element meistens 0.
+     *
+     * GuardedCircularBuffer funktioniert -> nichts wird mehr im Überschuss produziert / konsumiert
+     *
+     * Ich habe Notify verwendet. NotifyAll wäre in diesem Fall unnötig weil wenn all threads gleichzeitig
+     * im "Entry Room" sind müssen sie dort trotzdem warten und können nichts anderes machen. Deswegen reicht
+     * es einen Thread in den "Entry Room" zu schicken. Funktionieren würde aber beides. Würde der Producer
+     * Thread beispielsweise noch 2 Sekunden brauchen im sich auf das produzieren vorzubereiten würde Sinn
+     * ergeben NotifyAll zu verwenden
+     *
+     *
+     * */
 }
