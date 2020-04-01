@@ -2,11 +2,11 @@ package ch.zhaw.prog2.circularbuffer;
 
 public class CircBufferTest {
     public static void main(String[] args) {
-        final int capacity = 15; // Number of buffer items
-        final int prodCount = 3; // Number of producer threads
-        final int consCount = 3; // Number of consumer threads
-        final int maxProdTime = 5000; // max. production time for one item
-        final int maxConsTime = 3000; // max. consumption time for one item
+        final int capacity = 5; // Number of buffer items
+        final int prodCount = 5; // Number of producer threads
+        final int consCount = 2; // Number of consumer threads
+        final int maxProdTime = 200; // max. production time for one item
+        final int maxConsTime = 5000; // max. consumption time for one item
 
         try {
             Buffer<String> buffer = new CircularBuffer<>(
@@ -39,10 +39,12 @@ public class CircBufferTest {
         // ToDo: Add required instance variables
         private Buffer producerFillBuffer;
         private int prodTime;
+        private String threadName = "";
 
         public Producer(String name, Buffer<String> buffer, int prodTime) {
             super(name);
             // ToDo implement Constructor
+            threadName = name;
             this.producerFillBuffer = buffer;
             this.prodTime = prodTime;
         }
@@ -54,7 +56,7 @@ public class CircBufferTest {
                 try {
                     double random = (Math.random() * prodTime);
                     sleep((int)random);
-                    producerFillBuffer.put("ich heisse Selim" + " Time to produce -> " + random);
+                    producerFillBuffer.put(threadName + " Time to produce -> " + random);
                     System.out.println("! produced !");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -89,23 +91,17 @@ public class CircBufferTest {
         }
     }
     /*
-     * Remarks
+     * Theoretische  Aufgabe 2.3
      *
-     * Wenn maxProdTime und maxConsTime identisch sind schwank die Anzahl der Element im Buffer leicht
-     * aber sie bleibt immer ungefähr gleich (je nach random faktor)
+     * Benützt man für macProdTIme und maxConsTime die gleiche zeit, dann schwankt die a Anzahl der Elemente nur minimal,
+     * sollte ca. gleich bleiben aber ist abhängig vom randomfaktor.
      *
-     * Wenn maxProdTime weniger ist als maxConsTime steigt die Anzahl Element im Buffer bis das max erreicht ist
+     * Wenn man die Bedingung maxProdTime < maxConsTime hat, inkrementiert die Anzahl Elemente im Buffer bis zum Maximum.
+     * Ist die Bedingung maxProdTime > maxConsTime, so wird die Anzahl 0 sein.
+     * Überschuss an Produktion und Konsum wird durch GuardedCircularBuffer gewährleistet.
      *
-     * Wenn maxProdTime mehr ist als maxConsTime ist die Anzahl der Element meistens 0.
-     *
-     * GuardedCircularBuffer funktioniert -> nichts wird mehr im Überschuss produziert / konsumiert
-     *
-     * Ich habe Notify verwendet. NotifyAll wäre in diesem Fall unnötig weil wenn all threads gleichzeitig
-     * im "Entry Room" sind müssen sie dort trotzdem warten und können nichts anderes machen. Deswegen reicht
-     * es einen Thread in den "Entry Room" zu schicken. Funktionieren würde aber beides. Würde der Producer
-     * Thread beispielsweise noch 2 Sekunden brauchen im sich auf das produzieren vorzubereiten würde Sinn
-     * ergeben NotifyAll zu verwenden
-     *
+     * Mein Programm verwendet NotifyAll, weil in dieser Zeit die anderen Thread keine Aufgaben / Prozesse erfüllen müssen.
+     * Natürlich kann man auch Notify verwenden, aber in diesem Programm, spielt es keine Rolle.
      *
      * */
 }
