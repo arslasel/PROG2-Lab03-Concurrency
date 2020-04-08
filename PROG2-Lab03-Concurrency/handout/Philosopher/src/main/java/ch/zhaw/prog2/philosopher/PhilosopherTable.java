@@ -58,7 +58,7 @@ class PhilosopherTable extends Observable {
 class ForkManager {
 
     enum ForkState {
-        FREE, OCCUPIED, AWAITED
+        FREE, OCCUPIED
     }
 
     static class Fork {
@@ -76,24 +76,21 @@ class ForkManager {
     private int nrForks;
     private Fork[] forks;
     private Lock mutex;
-    private SynchronousQueue<Fork> forkQueue;
+    //private SynchronousQueue<Fork> forkQueue;
 
     public ForkManager(int nrForks) {
-        forkQueue = new SynchronousQueue<>();
         this.mutex = new ReentrantLock();
         this.nrForks = nrForks;
         this.forks = new Fork[nrForks];
-        for (int i = 0; i < nrForks; i++) {
+        for (int i = 0; i < nrForks; i++)
             forks[i] = new Fork(mutex);
-        }
     }
 
     public void acquireFork(int i) {
         try {
             mutex.lock();
-            forkQueue.put(forks[i]);
-            //while (forks[i].forkState == ForkState.OCCUPIED)
-            // forks[i].cond.await();
+            while (forks[i].forkState == ForkState.OCCUPIED)
+                forks[i].cond.await();
             forks[i].forkState = ForkState.OCCUPIED;
         } catch (InterruptedException e) {
             System.err.println("Interrupted: " + e.getMessage());
@@ -106,10 +103,7 @@ class ForkManager {
         try {
             mutex.lock();
             forks[i].forkState = ForkState.FREE;
-            forkQueue.take();
             forks[i].cond.signal();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         } finally {
             mutex.unlock();
         }
@@ -161,7 +155,7 @@ class Philosopher extends Thread {
             philoState = PhiloState.THINKING;
             table.notifyStateChange(this);
             int time = 5;
-            sleep((int) (Math.random() * time * 500));
+            sleep((int) (Math.random() * time * 1000));
         } catch (InterruptedException e) {
             System.err.println("Interrupted: " + e.getMessage());
         }
@@ -172,7 +166,7 @@ class Philosopher extends Thread {
             philoState = PhiloState.EATING;
             table.notifyStateChange(this);
             int time = 1;
-            sleep((int) (Math.random() * time * 500));
+            sleep((int) (Math.random() * time * 1000));
         } catch (InterruptedException e) {
             System.err.println("Interrupted: " + e.getMessage());
         }
